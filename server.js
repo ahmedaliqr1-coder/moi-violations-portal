@@ -22,7 +22,21 @@ app.get('/', (req, res) => {
   });
 });
 
-// Serve any requested file
+// Serve /main/* routes from the root directory
+app.get('/main/*', (req, res) => {
+  const requestedPath = req.path.replace('/main/', '');
+  const filePath = path.join(__dirname, requestedPath);
+  console.log(`Requested: ${req.path} -> ${filePath}`);
+  
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error(`File not found: ${filePath}`, err.message);
+      res.status(404).send('File not found');
+    }
+  });
+});
+
+// Serve any other requested file
 app.get('*', (req, res) => {
   const filePath = path.join(__dirname, req.path);
   console.log(`Requested: ${req.path} -> ${filePath}`);
