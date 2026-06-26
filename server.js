@@ -65,6 +65,7 @@ app.use((err, req, res, next) => {
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on http://0.0.0.0:${PORT}`);
   console.log(`📁 Serving files from: ${__dirname}`);
+  console.log(`🌐 Public URL: https://moi-violations-portal-production.up.railway.app`);
 });
 
 // Handle graceful shutdown
