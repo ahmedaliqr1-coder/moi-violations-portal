@@ -4,29 +4,66 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-// Serve static files from the root directory
-app.use(express.static(path.join(__dirname)));
+// Middleware
+app.use(express.static(path.join(__dirname), {
+  maxAge: '1d',
+  etag: false
+}));
 
-// Serve the main page
+// Main route - serve the violation enquiry page
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'eservices', 'gdt', 'violation-enquiry.html'));
-});
-
-// Serve any other HTML files
-app.get('/:folder/:subfolder/:file', (req, res) => {
-  const filePath = path.join(__dirname, req.params.folder, req.params.subfolder, req.params.file);
+  const filePath = path.join(__dirname, 'eservices', 'gdt', 'violation-enquiry.html');
+  console.log(`Serving: ${filePath}`);
   res.sendFile(filePath, (err) => {
     if (err) {
-      res.status(404).send('File not found');
+      console.error('Error serving file:', err);
+      res.status(500).send('Error loading page');
     }
   });
 });
 
-// Fallback 404
-app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'eservices', 'gdt', 'violation-enquiry.html'));
+// Serve any requested file
+app.get('*', (req, res) => {
+  const filePath = path.join(__dirname, req.path);
+  console.log(`Requested: ${req.path} -> ${filePath}`);
+  
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      // If file not found, serve the main page
+      console.log(`File not found: ${filePath}, serving main page`);
+      res.sendFile(path.join(__dirname, 'eservices', 'gdt', 'violation-enquiry.html'), (mainErr) => {
+        if (mainErr) {
+          console.error('Error serving main page:', mainErr);
+          res.status(404).send('Page not found');
+        }
+      });
+    }
+  });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).send('Internal server error');
+});
+
+// Start server
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server running on http://0.0.0.0:${PORT}`);
+  console.log(`📁 Serving files from: ${__dirname}`);
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  process.exit(1);
 });
