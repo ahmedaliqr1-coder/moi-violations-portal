@@ -1,0 +1,19 @@
+{
+  "name": "moi-violations-portal",
+  "version": "1.0.0",
+  "description": "Ministry of Interior - Traffic Violations Portal",
+  "main": "server.js",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["moi", "violations", "traffic"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
